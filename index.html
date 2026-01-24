@@ -375,10 +375,16 @@
     <script>
         let members = [];
         let isDrawing = false;
-        // Dynamic item height based on screen size
+        // Get actual item height from DOM
         function getItemHeight() {
+            const testItem = document.querySelector('.slot-item');
+            if (testItem) {
+                return testItem.offsetHeight;
+            }
+            // Fallback if no slot-item exists yet
             if (window.innerWidth <= 480) return 70;
             if (window.innerWidth <= 768) return 80;
+            if (window.innerWidth <= 1024) return 120;
             return 150;
         }
         const BASE_SPIN_DURATION = 4000;
@@ -429,14 +435,21 @@
         }
 
         function initializeReels() {
+            // SVG question mark icon
+            const questionMarkSVG = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+                    <circle cx="50" cy="50" r="45" fill="#667eea" opacity="0.2"/>
+                    <text x="50" y="70" font-size="60" text-anchor="middle" fill="#667eea" font-weight="bold">?</text>
+                </svg>
+            `;
+
             for (let i = 1; i <= 3; i++) {
                 const reel = document.getElementById(`reel${i}`);
                 reel.innerHTML = '';
-                // Create initial display with random member
-                const initialMember = members[Math.floor(Math.random() * members.length)];
+                // Display SVG question mark initially
                 const item = document.createElement('div');
                 item.className = 'slot-item';
-                item.textContent = initialMember;
+                item.innerHTML = questionMarkSVG;
                 reel.appendChild(item);
                 reel.style.transform = 'translateY(0px)';
             }
@@ -486,6 +499,9 @@
                 const extraSpins = 30; // Number of full rotations
                 const itemHeight = getItemHeight();
 
+                // Reset reel to top position first
+                reel.style.transform = 'translateY(0px)';
+
                 // Create a long reel with random names + winner at the end
                 const tempMembers = [];
                 for (let i = 0; i < extraSpins; i++) {
@@ -501,6 +517,9 @@
                     item.textContent = member;
                     reel.appendChild(item);
                 });
+
+                // Force reflow to ensure styles are applied
+                void reel.offsetHeight;
 
                 // Start from top
                 const startPosition = 0;
@@ -569,6 +588,17 @@
 
         // Initialize on load
         window.addEventListener('DOMContentLoaded', loadMembers);
+
+        // Re-initialize on window resize with debounce
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (!isDrawing) {
+                    initializeReels();
+                }
+            }, 250);
+        });
     </script>
 </body>
 </html>
