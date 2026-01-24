@@ -268,17 +268,65 @@
         }
 
         @media (max-width: 768px) {
+            .container { padding: 20px; }
             h1 { font-size: 2rem; }
-            .slot { width: 100px; height: 100px; }
-            .slot-item { height: 100px; font-size: 0.9rem; }
-            .slots-container { gap: 10px; }
-            .draw-button { padding: 15px 40px; font-size: 1.2rem; }
+            .subtitle { font-size: 1rem; }
+
+            .slot-machine { padding: 20px; }
+            .lights { display: none; }
+
+            /* Stack slots vertically on small screens */
+            .slots-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .slot {
+                width: 280px;
+                height: 80px;
+            }
+
+            .slot::before,
+            .slot::after {
+                height: 15px;
+            }
+
+            .slot-item {
+                height: 80px;
+                font-size: 1.1rem;
+            }
+
+            .draw-button {
+                padding: 15px 40px;
+                font-size: 1.2rem;
+            }
+
+            .result-display {
+                padding: 20px;
+            }
+
+            .winner-name {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            .subtitle { font-size: 0.9rem; }
+            .slot { width: 260px; height: 70px; }
+            .slot-item { height: 70px; font-size: 1rem; }
+            .winner-name { font-size: 1.2rem; }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .slot { width: 160px; height: 120px; }
+            .slot-item { height: 120px; font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Lab Lucky Draw</h1>
+        <h1>MP Lab Lucky Draw</h1>
         <p class="subtitle">Spin to pick 3 random members!</p>
 
         <div class="slot-machine" id="slotMachine">
@@ -326,7 +374,12 @@
     <script>
         let members = [];
         let isDrawing = false;
-        const ITEM_HEIGHT = 150;
+        // Dynamic item height based on screen size
+        function getItemHeight() {
+            if (window.innerWidth <= 480) return 70;
+            if (window.innerWidth <= 768) return 80;
+            return 150;
+        }
         const BASE_SPIN_DURATION = 4000;
 
         // Fetch and parse CSV
@@ -430,6 +483,7 @@
             return new Promise(resolve => {
                 const reel = document.getElementById(`reel${reelIndex}`);
                 const extraSpins = 30; // Number of full rotations
+                const itemHeight = getItemHeight();
 
                 // Create a long reel with random names + winner at the end
                 const tempMembers = [];
@@ -449,7 +503,7 @@
 
                 // Start from top
                 const startPosition = 0;
-                const targetPosition = -(tempMembers.length - 1) * ITEM_HEIGHT;
+                const targetPosition = -(tempMembers.length - 1) * itemHeight;
                 const totalDistance = Math.abs(targetPosition - startPosition);
 
                 let startTime = null;
